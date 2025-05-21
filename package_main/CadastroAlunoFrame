@@ -1,0 +1,82 @@
+package com.matriculas.gui;
+
+import com.matriculas.dao.AlunoDAO;
+import com.matriculas.model.Aluno;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class CadastrarAlunoFrame extends JFrame {
+    private JTextField nomeField;
+    private JTextField matriculaField;
+    private JTextField emailField;
+    private JComboBox<String> turmaComboBox;
+    private AlunoDAO alunoDAO;
+
+    public CadastrarAlunoFrame() {
+        alunoDAO = new AlunoDAO();
+        setTitle("Cadastrar Aluno");
+        setSize(350, 250);
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+        JPanel panel = new JPanel(new GridLayout(5, 2, 10, 10)); // 5 linhas, 2 colunas, espaçamento
+
+        panel.add(new JLabel("Nome do Aluno:"));
+        nomeField = new JTextField();
+        panel.add(nomeField);
+
+        panel.add(new JLabel("Número de Matrícula (máx. 6):"));
+        matriculaField = new JTextField();
+        panel.add(matriculaField);
+
+        panel.add(new JLabel("E-mail:"));
+        emailField = new JTextField();
+        panel.add(emailField);
+
+        panel.add(new JLabel("Turma:"));
+        String[] turmas = {"A", "B", "C"};
+        turmaComboBox = new JComboBox<>(turmas);
+        panel.add(turmaComboBox);
+
+        JButton enviarButton = new JButton("Enviar");
+        panel.add(enviarButton);
+
+        add(panel, BorderLayout.CENTER);
+
+        enviarButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String nome = nomeField.getText();
+                String matricula = matriculaField.getText();
+                String email = emailField.getText();
+                String turma = (String) turmaComboBox.getSelectedItem();
+
+                // Validação simples
+                if (nome.isEmpty() || matricula.isEmpty() || email.isEmpty()) {
+                    JOptionPane.showMessageDialog(CadastrarAlunoFrame.this,
+                            "Todos os campos devem ser preenchidos.", "Erro de Validação", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                if (matricula.length() > 6 || !matricula.matches("\\d+")) {
+                    JOptionPane.showMessageDialog(CadastrarAlunoFrame.this,
+                            "Número de matrícula inválido. Máximo 6 dígitos numéricos.", "Erro de Validação", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                if (!email.contains("@") || !email.contains(".")) {
+                    JOptionPane.showMessageDialog(CadastrarAlunoFrame.this,
+                            "E-mail inválido.", "Erro de Validação", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+
+                Aluno aluno = new Aluno(nome, matricula, email, turma);
+                alunoDAO.cadastrarAluno(aluno);
+                JOptionPane.showMessageDialog(CadastrarAlunoFrame.this, "Aluno cadastrado com sucesso!");
+                dispose(); // Fecha a janela após o cadastro
+            }
+        });
+    }
+}
