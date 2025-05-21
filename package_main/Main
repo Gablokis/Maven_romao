@@ -1,0 +1,16 @@
+package com.matriculas.main;
+
+import com.matriculas.gui.MainFrame;
+
+import javax.swing.*;
+
+public class Main {
+    public static void main(String[] args) {
+        // Garante que a GUI seja executada na Thread de Despacho de Eventos do Swing
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                new MainFrame().setVisible(true);
+            }
+        });
+    }
+}
