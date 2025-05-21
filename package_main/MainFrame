@@ -1,0 +1,63 @@
+package com.matriculas.gui;
+
+import com.matriculas.util.MongoConnection;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class MainFrame extends JFrame {
+
+    public MainFrame() {
+        setTitle("Sistema de Matrículas de Alunos");
+        setSize(400, 300);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null); // Centraliza a janela
+
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(4, 1, 10, 10)); // 4 linhas, 1 coluna, espaçamento
+
+        JButton cadastrarAlunoButton = new JButton("Cadastrar Aluno");
+        JButton listarAlunosButton = new JButton("Listar Alunos");
+        JButton removerAlunoButton = new JButton("Remover Aluno");
+        JButton fecharButton = new JButton("Fechar Janela");
+
+        panel.add(cadastrarAlunoButton);
+        panel.add(listarAlunosButton);
+        panel.add(removerAlunoButton);
+        panel.add(fecharButton);
+
+        add(panel, BorderLayout.CENTER);
+
+        // Ações dos botões
+        cadastrarAlunoButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new CadastrarAlunoFrame().setVisible(true);
+            }
+        });
+
+        listarAlunosButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new ListarAlunosFrame().setVisible(true);
+            }
+        });
+
+        removerAlunoButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new RemoverAlunoFrame().setVisible(true);
+            }
+        });
+
+        fecharButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                MongoConnection.closeConnection(); // Fechar a conexão com o MongoDB
+                System.exit(0);
+            }
+        });
+    }
+}
