@@ -1,0 +1,69 @@
+package com.matriculas.dao;
+
+import com.matriculas.model.Aluno;
+import com.matriculas.util.MongoConnection;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import org.bson.Document;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Updates;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class AlunoDAO {
+    private MongoCollection<Document> collection;
+
+    public AlunoDAO() {
+        MongoDatabase database = MongoConnection.getDatabase();
+        this.collection = database.getCollection("alunos"); // Nome da sua coleção
+    }
+
+    public void cadastrarAluno(Aluno aluno) {
+        Document doc = new Document("nome", aluno.getNome())
+                .append("numeroMatricula", aluno.getNumeroMatricula())
+                .append("email", aluno.getEmail())
+                .append("turma", aluno.getTurma());
+        collection.insertOne(doc);
+        System.out.println("Aluno " + aluno.getNome() + " cadastrado com sucesso!");
+    }
+
+    public List<Aluno> listarAlunosPorTurma(String turma) {
+        List<Aluno> alunos = new ArrayList<>();
+        for (Document doc : collection.find(Filters.eq("turma", turma))) {
+            alunos.add(new Aluno(
+                    doc.getString("nome"),
+                    doc.getString("numeroMatricula"),
+                    doc.getString("email"),
+                    doc.getString("turma")
+            ));
+        }
+        return alunos;
+    }
+
+    public Aluno buscarAlunoPorMatricula(String numeroMatricula) {
+        Document doc = collection.find(Filters.eq("numeroMatricula", numeroMatricula)).first();
+        if (doc != null) {
+            return new Aluno(
+                    doc.getString("nome"),
+                    doc.getString("numeroMatricula"),
+                    doc.getString("email"),
+                    doc.getString("turma")
+            );
+        }
+        return null;
+    }
+
+    public boolean removerAluno(String numeroMatricula) {
+        Document result = collection.findOneAndDelete(Filters.eq("numeroMatricula", numeroMatricula));
+        return result != null;
+    }
+
+    public boolean trocarTurmaAluno(String numeroMatricula, String novaTurma) {
+        Document result = collection.findOneAndUpdate(
+                Filters.eq("numeroMatricula", numeroMatricula),
+                Updates.set("turma", novaTurma)
+        );
+        return result != null;
+    }
+}
