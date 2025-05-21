@@ -1,0 +1,53 @@
+package com.matriculas.model;
+
+public class Aluno {
+    private String nome;
+    private String numeroMatricula; // Máximo 6 números
+    private String email;
+    private String turma; // A, B ou C
+
+    public Aluno(String nome, String numeroMatricula, String email, String turma) {
+        this.nome = nome;
+        this.numeroMatricula = numeroMatricula;
+        this.email = email;
+        this.turma = turma;
+    }
+
+    // Getters e Setters
+    public String getNome() {
+        return nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public String getNumeroMatricula() {
+        return numeroMatricula;
+    }
+
+    public void setNumeroMatricula(String numeroMatricula) {
+        this.numeroMatricula = numeroMatricula;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getTurma() {
+        return turma;
+    }
+
+    public void setTurma(String turma) {
+        this.turma = turma;
+    }
+
+    @Override
+    public String toString() {
+        return "Matrícula: " + numeroMatricula + " | Nome: " + nome + " | Turma: " + turma;
+    }
+}
