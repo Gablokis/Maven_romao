@@ -1,0 +1,125 @@
+package com.matriculas.gui;
+
+import com.matriculas.dao.AlunoDAO;
+import com.matriculas.model.Aluno;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.List;
+
+public class ListarAlunosFrame extends JFrame {
+    private JComboBox<String> turmaComboBox;
+    private JTextArea alunosTextArea;
+    private JButton trocarButton;
+    private AlunoDAO alunoDAO;
+    private JList<String> alunoList;
+    private DefaultListModel<String> listModel;
+
+    public ListarAlunosFrame() {
+        alunoDAO = new AlunoDAO();
+        setTitle("Listar e Trocar Alunos por Turma");
+        setSize(500, 400);
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+        JPanel panel = new JPanel(new BorderLayout());
+
+        // Painel superior para seleção de turma
+        JPanel topPanel = new JPanel();
+        topPanel.add(new JLabel("Selecione a Turma:"));
+        String[] turmas = {"A", "B", "C"};
+        turmaComboBox = new JComboBox<>(turmas);
+        topPanel.add(turmaComboBox);
+
+        JButton buscarButton = new JButton("Buscar Alunos");
+        topPanel.add(buscarButton);
+        panel.add(topPanel, BorderLayout.NORTH);
+
+        // Área para exibir os alunos
+        listModel = new DefaultListModel<>();
+        alunoList = new JList<>(listModel);
+        JScrollPane scrollPane = new JScrollPane(alunoList);
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+        // Botão de Trocar
+        JPanel bottomPanel = new JPanel();
+        trocarButton = new JButton("Trocar Turma do Aluno");
+        trocarButton.setEnabled(false); // Desabilitado inicialmente
+        bottomPanel.add(trocarButton);
+        panel.add(bottomPanel, BorderLayout.SOUTH);
+
+        add(panel);
+
+        // Ações
+        buscarButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                carregarAlunosPorTurma();
+            }
+        });
+
+        alunoList.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting() && alunoList.getSelectedIndex() != -1) {
+                trocarButton.setEnabled(true);
+            } else {
+                trocarButton.setEnabled(false);
+            }
+        });
+
+        trocarButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int selectedIndex = alunoList.getSelectedIndex();
+                if (selectedIndex != -1) {
+                    String selectedAlunoString = alunoList.getSelectedValue();
+                    // Extrair número de matrícula (assumindo formato "Matrícula: XXX | Nome: YYY | Turma: ZZZ")
+                    String numeroMatricula = selectedAlunoString.split(" | ")[1]; // Isso é um split bem simples, cuidado!
+                    numeroMatricula = numeroMatricula.replace(":", "").trim(); // Removendo ':' e espaços
+
+                    // Diálogo para escolher a nova turma
+                    String[] turmasDisponiveis = {"A", "B", "C"};
+                    String novaTurma = (String) JOptionPane.showInputDialog(
+                            ListarAlunosFrame.this,
+                            "Selecione a nova turma para o aluno " + selectedAlunoString + ":",
+                            "Trocar Turma",
+                            JOptionPane.QUESTION_MESSAGE,
+                            null,
+                            turmasDisponiveis,
+                            turmasDisponiveis[0]);
+
+                    if (novaTurma != null) {
+                        boolean sucesso = alunoDAO.trocarTurmaAluno(numeroMatricula, novaTurma);
+                        if (sucesso) {
+                            JOptionPane.showMessageDialog(ListarAlunosFrame.this, "Turma do aluno trocada com sucesso!");
+                            carregarAlunosPorTurma(); // Atualiza a lista
+                        } else {
+                            JOptionPane.showMessageDialog(ListarAlunosFrame.this, "Erro ao trocar a turma do aluno.", "Erro", JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(ListarAlunosFrame.this, "Selecione um aluno para trocar a turma.", "Aviso", JOptionPane.WARNING_MESSAGE);
+                }
+            }
+        });
+
+        // Carregar a lista inicial ao abrir a janela
+        carregarAlunosPorTurma();
+    }
+
+    private void carregarAlunosPorTurma() {
+        String turmaSelecionada = (String) turmaComboBox.getSelectedItem();
+        List<Aluno> alunos = alunoDAO.listarAlunosPorTurma(turmaSelecionada);
+        listModel.clear();
+        if (alunos.isEmpty()) {
+            listModel.addElement("Nenhum aluno encontrado para a turma " + turmaSelecionada + ".");
+            trocarButton.setEnabled(false);
+        } else {
+            for (Aluno aluno : alunos) {
+                listModel.addElement(aluno.toString());
+            }
+            trocarButton.setEnabled(false); // Resetar o botão até que um novo aluno seja selecionado
+        }
+    }
+}
