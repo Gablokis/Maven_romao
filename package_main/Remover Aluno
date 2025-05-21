@@ -1,0 +1,63 @@
+package com.matriculas.gui;
+
+import com.matriculas.dao.AlunoDAO;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class RemoverAlunoFrame extends JFrame {
+    private JTextField matriculaField;
+    private AlunoDAO alunoDAO;
+
+    public RemoverAlunoFrame() {
+        alunoDAO = new AlunoDAO();
+        setTitle("Remover Aluno");
+        setSize(300, 150);
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+        JPanel panel = new JPanel(new GridLayout(2, 2, 10, 10));
+
+        panel.add(new JLabel("Digite o número de matrícula do aluno:"));
+        matriculaField = new JTextField();
+        panel.add(matriculaField);
+
+        JButton confirmarButton = new JButton("Confirmar");
+        panel.add(confirmarButton);
+
+        add(panel, BorderLayout.CENTER);
+
+        confirmarButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String numeroMatricula = matriculaField.getText();
+
+                if (numeroMatricula.isEmpty()) {
+                    JOptionPane.showMessageDialog(RemoverAlunoFrame.this,
+                            "Digite o número de matrícula para remover.", "Erro de Validação", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                if (!numeroMatricula.matches("\\d+")) {
+                    JOptionPane.showMessageDialog(RemoverAlunoFrame.this,
+                            "Número de matrícula inválido. Deve conter apenas dígitos numéricos.", "Erro de Validação", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                int confirm = JOptionPane.showConfirmDialog(RemoverAlunoFrame.this,
+                        "Tem certeza que deseja remover o aluno com matrícula " + numeroMatricula + "?", "Confirmação", JOptionPane.YES_NO_OPTION);
+
+                if (confirm == JOptionPane.YES_OPTION) {
+                    boolean removido = alunoDAO.removerAluno(numeroMatricula);
+                    if (removido) {
+                        JOptionPane.showMessageDialog(RemoverAlunoFrame.this, "Aluno removido com sucesso!");
+                        dispose();
+                    } else {
+                        JOptionPane.showMessageDialog(RemoverAlunoFrame.this, "Aluno com matrícula " + numeroMatricula + " não encontrado.", "Erro", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            }
+        });
+    }
+}
